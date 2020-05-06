@@ -1,114 +1,92 @@
-entity Region {
-	regionName String
+
+entity Professionista{
+	idProfessionista Int required
+    nome String
+    cognome String
+    tipologia String
+    codiceFiscale String required
+    pIva String 
+    studioAssociato String
+    idLicenza Int 
 }
 
-entity Country {
-	countryName String
+entity Licenza {
+	idLicenza Int required
+	tipologia String
+	descrizione String
+    dataScadenza DateTime
+    
 }
 
-// an ignored comment
-/** not an ignored comment */
-entity Location {
-	streetAddress String,
-	postalCode String,
-	city String,
-	stateProvince String
+entity Pratica {
+	idPratica Int required
+    idLic Int required
+    tdp Int required
+    idCollab Int 
+    idClient Int required
 }
 
-entity Department {
-	departmentName String required
+entity Collaboratore{
+	idCollaboratore Int required
+    nome String
+    cognome String
+    tipologia String
+    idPratic Int required
+    idInvito Int
 }
 
-/**
- * Task entity.
- * @author The JHipster team.
- */
-entity Task {
-	title String,
-	description String
+entity Cliente {
+	idCliente Int required
+    nome String
+    cognome String
+    idPraticaConnessa Int required
+}
+entity Invito {
+	utenteIscritto Boolean 
+    idUtente Int
+    idPratica Int
+    idInvito Int required
 }
 
-/**
- * The Employee entity.
- */
-entity Employee {
-	/**
-	* The firstname attribute.
-	*/
-	firstName String,
-	lastName String,
-	email String,
-	phoneNumber String,
-	hireDate Instant,
-	salary Long,
-	commissionPct Long
+entity StorageCloud{
+	idUtente Int required
+    idLicenza Int required
+    pianoBase String
+    dataCessione DateTime 
 }
 
-entity Job {
-	jobTitle String,
-	minSalary Long,
-	maxSalary Long
-}
-
-entity JobHistory {
-	startDate Instant,
-	endDate Instant,
-	language Language
-}
-
-enum Language {
-    FRENCH, ENGLISH, SPANISH
-}
-
-relationship OneToOne {
-	Country{region} to Region
+enum AmpliamentoStorage{
+	FIRSTKIT, SECONDKIT, THIRDKIT
 }
 
 relationship OneToOne {
-	Location{country} to Country
+	Licenza{idLicenza} to Professionista,
+	Invito{idUtente} to Collaboratore{idCollaboratore},
+    Invito{idUtente} to Cliente{idUtente},
+    Licenza{idLicenza} to StorageCloud,
+    Professionista{idProfessionista} to StorageCloud,
 }
-
-relationship OneToOne {
-	Department{location} to Location
+relationship OneToMany{
+	Licenza{idLicenza} to Pratica{idLic},
+    Pratica{idPratica} to Invito{idPratica},
+	Professionista{idProfessionista} to Invito{idUtente}
+    Invito{idInvito} to Collaboratore {idInvito}
 }
+relationship ManyToMany{
+    Collaboratore{idCollaboratore} to Invito{idUtente}
+    Cliente{idCliente} to Invito{idPratica}
 
-relationship ManyToMany {
-	Job{task(title)} to Task{job}
-}
-
-// defining multiple OneToMany relationships with comments
-relationship OneToMany {
-	Employee to Job{employee},
-	/**
-	* A relationship
-	*/
-	Department to
-	/**
-	* Another side of the same relationship
-	*/
-	Employee{department}
-}
-
-relationship ManyToOne {
-	Employee{manager} to Employee
-}
-
-// defining multiple oneToOne relationships
-relationship OneToOne {
-	JobHistory{job} to Job,
-	JobHistory{department} to Department,
-	JobHistory{employee} to Employee
 }
 
 // Set pagination options
-paginate JobHistory, Employee with infinite-scroll
-paginate Job with pagination
+//paginate JobHistory, Employee with infinite-scroll
+paginate Collaboratore, Professionista, Cliente with pagination
 
 // Use Data Transfert Objects (DTO)
-// dto * with mapstruct
+dto * with mapstruct
 
 // Set service options to all except few
-service all with serviceImpl except Employee, Job
+service all with serviceImpl except Cliente, Collaboratore
 
 // Set an angular suffix
-// angularSuffix * with mySuffix
+ angularSuffix * with frontend
